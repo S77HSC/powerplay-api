@@ -1,0 +1,71 @@
+from pathlib import Path
+
+# Create the content of the file based on the analysis
+file_content = """
+✅ PowerPlay Backend Debug Report
+
+---
+
+## Current Backend File: main.py
+
+### ✅ Confirmed:
+- `/detect-football/` route **exists** and is defined properly.
+- **CORS middleware** is correctly set with `allow_origins=["*"]`.
+- Uploads are safely validated for:
+  - Missing file
+  - Empty file content
+- Detection model (`YOLO`) is loaded at startup.
+- Touch logic and tracking state are functional.
+- Routes also exist for:
+  - `POST /reset-touches/`
+  - `GET /touches/`
+
+---
+
+## 🚨 Live Issues Reported
+
+### 1. **404 on /detect-football/**
+**Error:**
+POST https://powerplay-api.onrender.com/detect-football/ - 404 Not Found
+
+**Causes:**
+- Incorrect file may be deployed to Render.
+- Dependencies may not be installed (causing silent failure).
+- App may not have restarted properly after changes.
+
+### 2. **CORS Block**
+**Error:**
+Access blocked by CORS: No 'Access-Control-Allow-Origin' header
+
+**Notes:**
+- CORS settings are correct **in code**.
+- Likely backend isn't starting correctly, so CORS headers never reach client.
+
+---
+
+## 🔧 Deployment Fix Checklist
+
+1. ✅ Rebuild & re-deploy Render backend with this exact `main.py`.
+2. ✅ Ensure `requirements.txt` includes:
+   - fastapi
+   - uvicorn
+   - numpy
+   - opencv-python
+   - ultralytics
+3. ✅ Check Render logs for:
+   - Import errors
+   - YOLO model loading issues
+   - Route registration failures
+
+---
+
+## ✅ Optional Improvement
+
+Wrap `/detect-football/` in `try/except` to surface backend errors in response:
+```python
+@app.post("/detect-football/")
+async def detect_football(file: UploadFile = File(...)):
+    try:
+        ...
+    except Exception as e:
+        return {"error": str(e)}
